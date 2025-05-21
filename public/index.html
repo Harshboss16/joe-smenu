@@ -1,0 +1,44 @@
+
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Customer Ordering</title>
+</head>
+<body>
+  <h1>Menu</h1>
+  <div id="menu"></div>
+  <h2>Cart</h2>
+  <div id="cart"></div>
+  <h3>Customer Info</h3>
+  <input id="name" placeholder="Name"><br>
+  <input id="number" placeholder="Phone"><br>
+  <input id="address" placeholder="Address"><br>
+  <button onclick="placeOrder()">Order via WhatsApp</button>
+  <script type="module">
+    import {{ db }} from './firebase-config.js';
+    import {{ collection, getDocs }} from "https://www.gstatic.com/firebasejs/11.8.0/firebase-firestore.js";
+
+    const menuDiv = document.getElementById('menu');
+    const cart = [];
+    const menuSnapshot = await getDocs(collection(db, 'menuItems'));
+    menuSnapshot.forEach(doc => {{
+      const item = doc.data();
+      const btn = document.createElement('button');
+      btn.textContent = `Add ${{item.name}} - ₹${{item.price}}`;
+      btn.onclick = () => {{ cart.push(item); alert('Added to cart'); }};
+      menuDiv.appendChild(btn);
+      menuDiv.appendChild(document.createElement('br'));
+    }});
+
+    window.placeOrder = function() {{
+      const name = document.getElementById('name').value;
+      const number = document.getElementById('number').value;
+      const address = document.getElementById('address').value;
+      const items = cart.map(i => i.name + ' ₹' + i.price).join(', ');
+      const total = cart.reduce((sum, i) => sum + i.price, 0);
+      const message = `Order from ${{name}} (%2B91${{number}}): ${{items}}. Total ₹${{total}}. Address: ${{address}}`;
+      window.open(`https://wa.me/91XXXXXXXXXX?text=${{encodeURIComponent(message)}}`);
+    }}
+  </script>
+</body>
+</html>
